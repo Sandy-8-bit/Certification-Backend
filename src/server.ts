@@ -19,7 +19,7 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
-app.options("*", cors());
+
 
 app.get("/", (req: Request, res: Response) => {
   res.send("Hello, World!");
