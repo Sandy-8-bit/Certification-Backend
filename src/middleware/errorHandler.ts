@@ -15,6 +15,12 @@ export function globalErrorHandler(
   if (err instanceof AppError) {
     statusCode = err.statusCode;
     message = err.message;
+  } else if (err.name === "TokenExpiredError") {
+    statusCode = 401;
+    message = "Token expired";
+  } else if (err.name === "JsonWebTokenError") {
+    statusCode = 401;
+    message = "Invalid token";
   }
 
   // Prisma known errors

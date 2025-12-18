@@ -1,5 +1,6 @@
 import type { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
+import { AppError } from "../errors/appError";
 
 export interface AuthRequest extends Request {
   user?: {
@@ -10,13 +11,13 @@ export interface AuthRequest extends Request {
 
 export function supabaseAuth(
   req: AuthRequest,
-  res: Response,
+  _res: Response,
   next: NextFunction
 ) {
   const authHeader = req.headers.authorization;
 
   if (!authHeader?.startsWith("Bearer ")) {
-    return res.status(401).json({ error: "Missing Authorization header" });
+    return next(new AppError("Missing Authorization header", 401));
   }
 
   const token = authHeader.split(" ")[1];
@@ -34,8 +35,8 @@ export function supabaseAuth(
     };
 
     next();
-  } catch (err) {
-    console.error(err);
-    return res.status(401).json({ error: "Invalid or expired token" });
+  } catch (err: any) {
+    // Let global error handler decide how to log & respond
+    next(err);
   }
 }
