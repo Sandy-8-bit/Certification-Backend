@@ -1,16 +1,5 @@
 import type { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
-import jwksClient from "jwks-rsa";
-
-const jwks = jwksClient({
-  jwksUri: `${process.env.SUPABASE_URL}/auth/v1/keys`,
-});
-
-function getKey(header: any, callback: any) {
-  jwks.getSigningKey(header.kid, (err, key) => {
-    callback(null, key?.getPublicKey());
-  });
-}
 
 export interface AuthRequest extends Request {
   user?: {
@@ -26,16 +15,18 @@ export function supabaseAuth(
 ) {
   const authHeader = req.headers.authorization;
 
-  if (!authHeader) {
+  if (!authHeader?.startsWith("Bearer ")) {
     return res.status(401).json({ error: "Missing Authorization header" });
   }
 
-  const token = authHeader.replace("Bearer ", "");
+  const token = authHeader.split(" ")[1];
 
-  jwt.verify(token, getKey, {}, (err, decoded: any) => {
-    if (err) {
-      return res.status(401).json({ error: "Invalid token" });
-    }
+  try {
+    const decoded: any = jwt.verify(token, process.env.SUPABASE_JWT_SECRET!, {
+      algorithms: ["HS256"],
+      audience: "authenticated",
+      issuer: `${process.env.SUPABASE_URL}/auth/v1`,
+    });
 
     req.user = {
       id: decoded.sub,
@@ -43,5 +34,8 @@ export function supabaseAuth(
     };
 
     next();
-  });
+  } catch (err) {
+    console.error(err);
+    return res.status(401).json({ error: "Invalid or expired token" });
+  }
 }

@@ -4,15 +4,16 @@ import express, {
   type Response,
 } from "express";
 
-import adminUserRouter from "./routes/adminUser";
+import userRouter from "./routes/adminUser";
 
 const app: Application = express();
 
+app.use(express.json());
 app.get("/", (req: Request, res: Response) => {
   res.send("Hello, World!");
 });
 
-app.use(express.json());
-app.use("/users", adminUserRouter);
+// use validation routes
+app.use("/users", userRouter);
 
 export default app;
