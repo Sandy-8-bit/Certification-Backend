@@ -29,6 +29,10 @@ export function supabaseAuth(
       issuer: `${process.env.SUPABASE_URL}/auth/v1`,
     });
 
+    if (!decoded.sub || !decoded.email) {
+      return next(new AppError("Invalid token: missing subject or email", 401));
+    }
+
     req.user = {
       id: decoded.sub,
       email: decoded.email,
@@ -36,7 +40,6 @@ export function supabaseAuth(
 
     next();
   } catch (err: any) {
-    // Let global error handler decide how to log & respond
     next(err);
   }
 }

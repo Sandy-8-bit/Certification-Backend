@@ -17,7 +17,7 @@ router.get(
   supabaseAuth,
   asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) {
-      throw new AppError("Unauthorized", 401);
+      throw new AppError("Invalid authentication token", 401);
     }
 
     const { id, email } = req.user;
@@ -30,7 +30,7 @@ router.get(
       user = await prisma.user.create({
         data: {
           id,
-          email: email!,
+          email: email ?? "",
           role: id === ADMIN_SUPABASE_ID ? "admin" : "user",
           name: id === ADMIN_SUPABASE_ID ? "admin" : "user",
         },

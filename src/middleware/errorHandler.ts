@@ -4,60 +4,68 @@ import { Prisma } from "@prisma/client";
 
 export function globalErrorHandler(
   err: any,
-  req: Request,
+  _req: Request,
   res: Response,
-  next: NextFunction
+  _next: NextFunction
 ) {
-  let statusCode = 500;
-  let message = "Internal server error";
+  // Operational errors (intentional)
+  if (err instanceof AppError && err.isOperational) {
+    if (process.env.NODE_ENV !== "production") {
+      console.error("OPERATIONAL ERROR :", err);
+    }
 
-  // Custom AppError
-  if (err instanceof AppError) {
-    statusCode = err.statusCode;
-    message = err.message;
-  } else if (err.name === "TokenExpiredError") {
-    statusCode = 401;
-    message = "Token expired";
-  } else if (err.name === "JsonWebTokenError") {
-    statusCode = 401;
-    message = "Invalid token";
+    return res.status(err.statusCode).json({
+      success: false,
+      message: err.message,
+    });
   }
 
   // Prisma known errors
-  else if (err instanceof Prisma.PrismaClientKnownRequestError) {
-    statusCode = 400;
+  if (err instanceof Prisma.PrismaClientKnownRequestError) {
+    let message = "Database error";
+    let statusCode = 400;
 
     if (err.code === "P2002") {
       message = "Duplicate value. Unique constraint failed.";
     } else if (err.code === "P2025") {
       message = "Record not found.";
-    } else {
-      message = "Database error.";
     }
+
+    return res.status(statusCode).json({
+      success: false,
+      message,
+    });
   }
 
-  // Prisma validation errors
-  else if (err instanceof Prisma.PrismaClientValidationError) {
-    statusCode = 400;
-    message = "Invalid data provided.";
+  if (err instanceof Prisma.PrismaClientValidationError) {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid data provided.",
+    });
   }
 
   // JWT errors
-  else if (err.name === "JsonWebTokenError") {
-    statusCode = 401;
-    message = "Invalid token.";
+  if (err.name === "JsonWebTokenError") {
+    let statusCode = 401;
+    let message = "Invalid token.";
+    return res.status(statusCode).json({
+      success: false,
+      message,
+    });
   } else if (err.name === "TokenExpiredError") {
-    statusCode = 401;
-    message = "Token expired.";
+    let statusCode = 401;
+    let message = "Token expired. Try Signing again.";
+    return res.status(statusCode).json({
+      success: false,
+      message,
+    });
   }
 
-  // Log only in non production
-  if (process.env.NODE_ENV !== "production") {
-    console.error("ERROR 💥", err);
-  }
+  // Fallback (true bugs / infra issues)
+  console.error("UNHANDLED ERROR :", err);
 
-  res.status(statusCode).json({
+  return res.status(500).json({
     success: false,
-    message,
+    message: "Internal server error",
   });
 }
