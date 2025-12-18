@@ -6,10 +6,11 @@ export interface AuthRequest extends Request {
   user?: {
     id: string;
     email?: string;
+    role?: "admin" | "user";
   };
 }
 
-export function supabaseAuth(
+export function supabaseAuthJwtDecode(
   req: AuthRequest,
   _res: Response,
   next: NextFunction
@@ -32,6 +33,8 @@ export function supabaseAuth(
     if (!decoded.sub || !decoded.email) {
       return next(new AppError("Invalid token: missing subject or email", 401));
     }
+
+    console.log(decoded);
 
     req.user = {
       id: decoded.sub,

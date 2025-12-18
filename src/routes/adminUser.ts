@@ -1,47 +1,14 @@
-import { Response, Router } from "express";
-import { prisma } from "../lib/prisma";
-import { supabaseAuth, AuthRequest } from "../middleware/supabaseAuth";
+import { Router } from "express";
+import { supabaseAuthJwtDecode } from "../middleware/supabaseAuth";
 import { asyncHandler } from "../utils/asyncHandler";
-import { AppError } from "../errors/appError";
+import { getCurrentUser } from "../controller/adminUserController";
 
-const router = Router();
-
-const ADMIN_SUPABASE_ID = process.env.ADMIN_UUID!;
+const adminUserRouter = Router();
 
 /**
- * Returns current user.
+ * Returns current user. (currently implemented for admin only thats why naming is adminUser)
  * Creates user if not exists.
  */
-router.get(
-  "/me",
-  supabaseAuth,
-  asyncHandler(async (req: AuthRequest, res: Response) => {
-    if (!req.user) {
-      throw new AppError("Invalid authentication token", 401);
-    }
+adminUserRouter.get("/me", supabaseAuthJwtDecode, asyncHandler(getCurrentUser));
 
-    const { id, email } = req.user;
-
-    let user = await prisma.user.findUnique({
-      where: { id },
-    });
-
-    if (!user) {
-      user = await prisma.user.create({
-        data: {
-          id,
-          email: email ?? "",
-          role: id === ADMIN_SUPABASE_ID ? "admin" : "user",
-          name: id === ADMIN_SUPABASE_ID ? "admin" : "user",
-        },
-      });
-    }
-
-    res.status(200).json({
-      success: true,
-      data: user,
-    });
-  })
-);
-
-export default router;
+export default adminUserRouter;

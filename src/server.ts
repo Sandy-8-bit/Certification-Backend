@@ -3,11 +3,12 @@ import express, {
   type Request,
   type Response,
 } from "express";
-
-import userRouter from "./routes/adminUser";
+import cors from "cors";
 import { AppError } from "./errors/appError";
 import { globalErrorHandler } from "./middleware/errorHandler";
-import cors from "cors";
+import adminUserRouter from "./routes/adminUser";
+import courseRouter from "./routes/course";
+
 const app: Application = express();
 
 app.use(express.json());
@@ -20,13 +21,13 @@ app.use(
   })
 );
 
-
 app.get("/", (req: Request, res: Response) => {
   res.send("Hello, World!");
 });
 
 // use validation routes
-app.use("/users", userRouter);
+app.use("/users", adminUserRouter);
+app.use("/course", courseRouter);
 
 // Handle unhandled routes & err
 app.use((req, _res, next) => {
