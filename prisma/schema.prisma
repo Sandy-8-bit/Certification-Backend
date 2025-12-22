@@ -1,6 +1,6 @@
 generator client {
   provider = "prisma-client-js"
-  url      = env("DATABASE_URL")
+  
 }
 
 datasource db {
@@ -8,26 +8,138 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Role {
-  admin
+model Courses {
+  id            String          @id @db.Uuid
+  course_name   String          @db.VarChar(255)
+  total_hours   Int
+  price         Decimal         @db.Decimal(10, 2)
+  description   String
+  thumbnail_url String          @db.VarChar(255)
+  created_at    DateTime        @default(now()) @db.Timestamptz(6)
+  contents      contents[]
+  subscriptions subscriptions[]
+}
+
+model Users {
+  id            String          @id @db.Uuid
+  name          String          @db.VarChar(255)
+  email         String          @unique(map: "users_email_unique") @db.VarChar(255)
+  profile_url   String?         @db.VarChar(255)
+  created_at    DateTime        @default(now()) @db.Timestamptz(6)
+  role          user_role       @default(user)
+  subscriptions subscriptions[]
+}
+
+model certificates {
+  id                   String            @id @db.Uuid
+  course_completion_id String            @unique(map: "certificates_completion_unique") @db.Uuid
+  certificate_number   String            @db.VarChar(100)
+  certificate_url      String            @db.VarChar(255)
+  issued_at            DateTime          @default(now()) @db.Timestamptz(6)
+  course_completion    course_completion @relation(fields: [course_completion_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "certificates_completion_foreign")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model contents {
+  id                    String                  @id @db.Uuid
+  course_id             String                  @db.Uuid
+  tier                  Int                     @default(1) @db.SmallInt
+  week                  Int
+  day                   Int
+  module_type           String                  @db.VarChar(50)
+  video_id              String?                 @db.Uuid
+  test_id               String?                 @db.Uuid
+  created_at            DateTime                @default(now()) @db.Timestamptz(6)
+  Courses               Courses                 @relation(fields: [course_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "contents_course_id_foreign")
+  tests                 tests?                  @relation(fields: [test_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "contents_test_id_foreign")
+  videos                videos?                 @relation(fields: [video_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "contents_video_id_foreign")
+  user_content_progress user_content_progress[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model course_completion {
+  id                    String        @id @db.Uuid
+  subscription_id       String        @unique(map: "course_completion_subscription_unique") @db.Uuid
+  total_contents        Int
+  completed_contents    Int           @default(0)
+  completion_percentage Decimal       @default(0) @db.Decimal(5, 2)
+  status                String        @default("not_started") @db.VarChar(50)
+  completed_at          DateTime?     @db.Timestamptz(6)
+  created_at            DateTime      @default(now()) @db.Timestamptz(6)
+  certificates          certificates?
+  subscriptions         subscriptions @relation(fields: [subscription_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "course_completion_subscription_foreign")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model quizzes {
+  id            String   @id @db.Uuid
+  test_id       String   @db.Uuid
+  question      String
+  choices       Json
+  answer        Json
+  isMultiChoice Boolean  @default(false)
+  created_at    DateTime @default(now()) @db.Timestamptz(6)
+  tests         tests    @relation(fields: [test_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "quizzes_test_id_foreign")
+}
+
+model subscriptions {
+  id                    String                  @id @db.Uuid
+  user_id               String                  @db.Uuid
+  course_id             String                  @db.Uuid
+  created_at            DateTime                @default(now()) @db.Timestamptz(6)
+  course_completion     course_completion?
+  Courses               Courses                 @relation(fields: [course_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "subscriptions_course_id_foreign")
+  Users                 Users                   @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "subscriptions_user_id_foreign")
+  user_content_progress user_content_progress[]
+
+  @@unique([user_id, course_id], map: "subscriptions_user_course_unique")
+}
+
+model tests {
+  id            String     @id @db.Uuid
+  title         String     @db.VarChar(255)
+  test_duration Int
+  quiz_count    Int
+  created_at    DateTime   @default(now()) @db.Timestamptz(6)
+  contents      contents[]
+  quizzes       quizzes[]
+}
+
+model user_content_progress {
+  id                String              @id @db.Uuid
+  subscription_id   String              @db.Uuid
+  content_id        String              @db.Uuid
+  video_progress    Int?
+  test_score        Int?
+  started_at        DateTime?           @db.Timestamptz(6)
+  ended_at          DateTime?           @db.Timestamptz(6)
+  created_at        DateTime            @default(now()) @db.Timestamptz(6)
+  completion_status user_content_status @default(not_progressed)
+  contents          contents            @relation(fields: [content_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "user_content_progress_content_id_foreign")
+  subscriptions     subscriptions       @relation(fields: [subscription_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "user_content_progress_subscription_id_foreign")
+
+  @@unique([subscription_id, content_id], map: "user_content_progress_unique")
+}
+
+model videos {
+  id            String     @id @db.Uuid
+  title         String     @db.VarChar(255)
+  description   String
+  video_url     String     @db.VarChar(255)
+  thumbnail_url String     @db.VarChar(255)
+  duration      Int
+  created_at    DateTime   @default(now()) @db.Timestamptz(6)
+  contents      contents[]
+}
+
+enum user_content_status {
+  not_progressed
+  in_progress
+  completed
+  failed
+}
+
+enum user_role {
   user
-}
-
-model User {
-  id        String   @id // Supabase user.id (UUID)
-  email     String   @unique
-  name      String?
-  role      Role     @default(user)
-  createdAt DateTime @default(now())
-}
-
-model Course {
-  id                 String   @id @default(uuid())
-  course_name        String   @unique
-  total_hours        Int
-  price              Float
-  course_description String?
-  thumbnail_url      String?
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  admin
 }

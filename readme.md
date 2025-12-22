@@ -69,14 +69,10 @@ prisma/
 #### Adding a New Model
 
 1. Update `prisma/schema.prisma` with the new `model`, relations, and enums.
-2. Generate a migration: `pnpm prisma migrate dev --name <meaningful-name>`.
-3. Inspect the generated SQL inside `prisma/migrations/<timestamp>_<name>/migration.sql`.
-4. Commit both the schema and migration folder so teammates share the same history.
-5. Access the new model via the typed Prisma client (`prisma.<model>`).
-
-#### Running Existing Migrations
-
-Use `pnpm prisma migrate dev` to apply pending migrations locally. For databases that should not run in "dev" mode (CI/CD), use `pnpm prisma migrate deploy`.
+2. Inspect the generated SQL inside `prisma/migrations/<timestamp>_<name>/migration.sql`.
+3. Commit both the schema and migration folder so teammates share the same history.
+4. Access the new model via the typed Prisma client (`prisma.<model>`).
+5. This is a supabse db first schema thus don't use prisma migrate.
 
 #### Prisma Studio
 
@@ -138,7 +134,6 @@ No automated tests are configured yet. When adding tests, prefer vitest/jest + s
 - Keep TypeScript strictness (no implicit `any`).
 - Use `asyncHandler` on every async route.
 - Throw `AppError` for expected HTTP errors; let unexpected issues bubble up.
-- Run `pnpm prisma migrate dev` after schema edits and commit the migration.
 - Verify `pnpm build` before pushing.
 
 This baseline follows clean layering (router → middleware → controller → prisma). Copy the existing `/users/me` route when introducing new resources to stay consistent.
