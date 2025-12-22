@@ -10,7 +10,7 @@ export const requireAdmin = asyncHandler(
       throw new AppError("Invalid authentication token", 401);
     }
 
-    const user = await prisma.user.findUnique({
+    const user = await prisma.users.findUnique({
       where: { id: req.user.id },
     });
 

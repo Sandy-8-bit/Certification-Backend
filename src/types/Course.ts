@@ -2,6 +2,8 @@ interface Course {
   course_name: string;
   total_hours: number;
   price: number;
-  course_description: string;
-  thumbnail_url?: string;
+  description: string;
+  thumbnail_url: string;
 }
+
+interface CourseCreate extends Omit<Course, "id"> {}

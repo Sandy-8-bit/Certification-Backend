@@ -12,12 +12,12 @@ export const getCurrentUser = async (req: AuthRequest, res: Response) => {
 
   const { id, email } = req.user;
 
-  let user = await prisma.user.findUnique({
+  let user = await prisma.users.findUnique({
     where: { id },
   });
 
   if (!user) {
-    user = await prisma.user.create({
+    user = await prisma.users.create({
       data: {
         id,
         email: email ?? "",

@@ -9,7 +9,7 @@ datasource db {
 }
 
 model Courses {
-  id            String          @id @db.Uuid
+  id            String   @id @default(uuid()) @db.Uuid
   course_name   String          @db.VarChar(255)
   total_hours   Int
   price         Decimal         @db.Decimal(10, 2)
@@ -21,7 +21,7 @@ model Courses {
 }
 
 model Users {
-  id            String          @id @db.Uuid
+  id            String   @id @default(uuid()) @db.Uuid
   name          String          @db.VarChar(255)
   email         String          @unique(map: "users_email_unique") @db.VarChar(255)
   profile_url   String?         @db.VarChar(255)
@@ -31,7 +31,7 @@ model Users {
 }
 
 model certificates {
-  id                   String            @id @db.Uuid
+  id                   String            @id @default(uuid()) @db.Uuid
   course_completion_id String            @unique(map: "certificates_completion_unique") @db.Uuid
   certificate_number   String            @db.VarChar(100)
   certificate_url      String            @db.VarChar(255)
@@ -41,7 +41,7 @@ model certificates {
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model contents {
-  id                    String                  @id @db.Uuid
+  id                    String                  @id @default(uuid()) @db.Uuid
   course_id             String                  @db.Uuid
   tier                  Int                     @default(1) @db.SmallInt
   week                  Int
@@ -58,7 +58,7 @@ model contents {
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model course_completion {
-  id                    String        @id @db.Uuid
+  id                    String        @id @default(uuid()) @db.Uuid
   subscription_id       String        @unique(map: "course_completion_subscription_unique") @db.Uuid
   total_contents        Int
   completed_contents    Int           @default(0)
@@ -72,7 +72,7 @@ model course_completion {
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model quizzes {
-  id            String   @id @db.Uuid
+  id            String   @id @default(uuid()) @db.Uuid
   test_id       String   @db.Uuid
   question      String
   choices       Json
@@ -83,7 +83,7 @@ model quizzes {
 }
 
 model subscriptions {
-  id                    String                  @id @db.Uuid
+  id                    String                  @id @default(uuid()) @db.Uuid
   user_id               String                  @db.Uuid
   course_id             String                  @db.Uuid
   created_at            DateTime                @default(now()) @db.Timestamptz(6)
@@ -96,7 +96,7 @@ model subscriptions {
 }
 
 model tests {
-  id            String     @id @db.Uuid
+  id            String     @id @default(uuid()) @db.Uuid
   title         String     @db.VarChar(255)
   test_duration Int
   quiz_count    Int
@@ -106,7 +106,7 @@ model tests {
 }
 
 model user_content_progress {
-  id                String              @id @db.Uuid
+  id                String              @id @default(uuid()) @db.Uuid
   subscription_id   String              @db.Uuid
   content_id        String              @db.Uuid
   video_progress    Int?
@@ -122,7 +122,7 @@ model user_content_progress {
 }
 
 model videos {
-  id            String     @id @db.Uuid
+  id            String     @id @default(uuid()) @db.Uuid
   title         String     @db.VarChar(255)
   description   String
   video_url     String     @db.VarChar(255)
