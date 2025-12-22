@@ -31,15 +31,18 @@ app.get("/", (req: Request, res: Response) => {
 app.use("/users", adminUserRouter);
 app.use("/course", courseRouter);
 
+//swagger ui
+if (process.env.NODE_ENV !== "production") {
+  app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+}
+
+//favicon.ico handler
+app.get("/favicon.ico", (_, res) => res.status(204).end());
+
 // Handle unhandled routes & err
 app.use((req, _res, next) => {
   next(new AppError(`Route ${req.originalUrl} not found`, 404));
 });
 app.use(globalErrorHandler);
-
-//swagger ui
-if (process.env.NODE_ENV !== "production") {
-  app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
-}
 
 export default app;
