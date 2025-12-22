@@ -121,7 +121,12 @@ router.get("/:id", asyncHandler(getCourseById));
  *       403:
  *         description: Admin access required
  */
-router.put("/:id", requireAdmin, asyncHandler(updateCourse));
+router.put(
+  "/:id",
+  supabaseAuthJwtDecode,
+  requireAdmin,
+  asyncHandler(updateCourse)
+);
 
 /**
  * @swagger
@@ -143,6 +148,11 @@ router.put("/:id", requireAdmin, asyncHandler(updateCourse));
  *       403:
  *         description: Admin access required
  */
-router.delete("/:id", requireAdmin, asyncHandler(deleteCourse));
+router.delete(
+  "/:id",
+  supabaseAuthJwtDecode,
+  requireAdmin,
+  asyncHandler(deleteCourse)
+);
 
 export default router;

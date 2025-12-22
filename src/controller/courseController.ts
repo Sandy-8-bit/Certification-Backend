@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { prisma } from "../lib/prisma";
+import { AppError } from "../errors/appError";
 
 /* CREATE COURSE */
 export const createCourse = async (
@@ -10,8 +11,7 @@ export const createCourse = async (
     req.body;
 
   if (!course_name || !total_hours || !price || !description) {
-    res.status(400);
-    throw new Error("All fields are required");
+    throw new AppError("All fields are required", 400);
   }
 
   const course = await prisma.courses.create({
@@ -44,7 +44,7 @@ export const getCourseById = async (req: Request, res: Response) => {
 
   if (!course) {
     res.status(404);
-    throw new Error("Course not found");
+    throw new AppError("Course not found", 404);
   }
 
   res.json(course);
