@@ -8,6 +8,8 @@ import { AppError } from "./errors/appError";
 import { globalErrorHandler } from "./middleware/errorHandler";
 import adminUserRouter from "./routes/adminUser";
 import courseRouter from "./routes/course";
+import swaggerUi from "swagger-ui-express";
+import { swaggerSpec } from "./config/swagger";
 
 const app: Application = express();
 
@@ -34,5 +36,10 @@ app.use((req, _res, next) => {
   next(new AppError(`Route ${req.originalUrl} not found`, 404));
 });
 app.use(globalErrorHandler);
+
+//swagger ui
+if (process.env.NODE_ENV !== "production") {
+  app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+}
 
 export default app;
