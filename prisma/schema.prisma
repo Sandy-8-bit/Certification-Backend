@@ -51,6 +51,8 @@ model contents {
   video_id              String?                 @db.Uuid
   test_id               String?                 @db.Uuid
   created_at            DateTime                @default(now()) @db.Timestamptz(6)
+  exercise_id           String?                 @db.Uuid
+  tier_name             String?                 @db.VarChar(100)
   Courses               Courses                 @relation(fields: [course_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "contents_course_id_foreign")
   tests                 tests?                  @relation(fields: [test_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "contents_test_id_foreign")
   videos                videos?                 @relation(fields: [video_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "contents_video_id_foreign")
