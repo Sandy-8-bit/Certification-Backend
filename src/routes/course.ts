@@ -9,6 +9,7 @@ import {
 } from "../controller/courseController";
 import { requireAdmin } from "../middleware/requireAdmin";
 import { supabaseAuthJwtDecode } from "../middleware/supabaseAuth";
+import { upload } from "../middleware/upload";
 
 const router = Router();
 
@@ -60,6 +61,7 @@ router.post(
   "/",
   supabaseAuthJwtDecode,
   requireAdmin,
+  upload.single("file"),
   asyncHandler(createCourse)
 );
 
@@ -125,6 +127,7 @@ router.put(
   "/:id",
   supabaseAuthJwtDecode,
   requireAdmin,
+  upload.single("file"),
   asyncHandler(updateCourse)
 );
 
