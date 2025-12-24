@@ -10,19 +10,26 @@ export const getCurrentUser = async (req: AuthRequest, res: Response) => {
     throw new AppError("Invalid authentication token", 401);
   }
 
-  const { id, email } = req.user;
+  const { id, email, name } = req.user;
+
+  if (!email) {
+    throw new AppError("Email field required", 400);
+  }
 
   let user = await prisma.users.findUnique({
     where: { id },
   });
 
+  if (id !== ADMIN_SUPABASE_ID && !name && name !== undefined)
+    throw new AppError("Name field required for users", 400);
+
   if (!user) {
     user = await prisma.users.create({
       data: {
         id,
-        email: email ?? "",
+        email: email,
         role: id === ADMIN_SUPABASE_ID ? "admin" : "user",
-        name: id === ADMIN_SUPABASE_ID ? "admin" : "user",
+        name: id === ADMIN_SUPABASE_ID ? "admin" : name!,
       },
     });
   }
