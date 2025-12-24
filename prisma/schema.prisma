@@ -124,17 +124,21 @@ model courses {
   is_active     Boolean         @default(true)
   contents      contents[]
   subscriptions subscriptions[]
+
+   @@map("courses")
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model users {
-  id            String           @id @default(uuid()) @db.Uuid
+  id            String          @id @default(uuid()) @db.Uuid
   name          String          @db.VarChar(255)
   email         String          @unique(map: "users_email_unique") @db.VarChar(255)
   profile_url   String?         @db.VarChar(255)
   created_at    DateTime        @default(now()) @db.Timestamptz(6)
   role          user_role       @default(user)
   subscriptions subscriptions[]
+  
+  @@map("users")
 }
 
 enum user_content_status {
