@@ -29,6 +29,7 @@ model contents {
   created_at            DateTime                @default(now()) @db.Timestamptz(6)
   exercise_id           String?                 @db.Uuid
   tier_name             String?                 @db.VarChar(100)
+  position              Int?                    @db.SmallInt
   Courses               courses                 @relation(fields: [course_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "contents_course_id_foreign")
   tests                 tests?                  @relation(fields: [test_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "contents_test_id_foreign")
   videos                videos?                 @relation(fields: [video_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "contents_video_id_foreign")
@@ -113,7 +114,7 @@ model videos {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model courses {
-  id            String          @id @default(uuid()) @db.Uuid
+  id            String          @id(map: "Courses_pkey") @default(uuid()) @db.Uuid
   course_name   String          @db.VarChar(255)
   total_hours   Int
   price         Decimal         @db.Decimal(10, 2)
@@ -125,19 +126,19 @@ model courses {
   contents      contents[]
   subscriptions subscriptions[]
 
-   @@map("courses")
+  @@map("courses")
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model users {
-  id            String          @id @default(uuid()) @db.Uuid
+  id            String          @id(map: "Users_pkey") @default(uuid()) @db.Uuid
   name          String          @db.VarChar(255)
   email         String          @unique(map: "users_email_unique") @db.VarChar(255)
   profile_url   String?         @db.VarChar(255)
   created_at    DateTime        @default(now()) @db.Timestamptz(6)
   role          user_role       @default(user)
   subscriptions subscriptions[]
-  
+
   @@map("users")
 }
 

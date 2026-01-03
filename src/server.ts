@@ -6,8 +6,8 @@ import express, {
 import cors from "cors";
 import { AppError } from "./errors/appError";
 import { globalErrorHandler } from "./middleware/errorHandler";
-import adminUserRouter from "./routes/adminUser";
-import courseRouter from "./routes/course";
+import adminUserRouter from "./routes/adminUser.routes";
+import courseRouter from "./routes/course.routes";
 import swaggerUi from "swagger-ui-express";
 import { swaggerSpec } from "./config/swagger";
 

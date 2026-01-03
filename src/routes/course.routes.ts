@@ -6,10 +6,14 @@ import {
   getCourseById,
   updateCourse,
   deleteCourse,
-} from "../controller/courseController";
+} from "../controller/CourseContentControllers/courseController";
 import { requireAdmin } from "../middleware/requireAdmin";
 import { supabaseAuthJwtDecode } from "../middleware/supabaseAuth";
 import { upload } from "../middleware/upload";
+import {
+  addCourseContent,
+  getCourseContents,
+} from "../controller/CourseContentControllers/contentController";
 
 const router = Router();
 
@@ -156,6 +160,50 @@ router.delete(
   supabaseAuthJwtDecode,
   requireAdmin,
   asyncHandler(deleteCourse)
+);
+
+// contents section
+
+/**
+ * @swagger
+ * /api/courses/{courseId}/contents:
+ *   post:
+ *     summary: Add content to a course
+ *     tags: [Courses]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: courseId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *     responses:
+ *       201:
+ *         description: Content added successfully
+ *       403:
+ *         description: Admin access required
+ *       404:
+ *         description: Course not found
+ */
+router.post(
+  "/:courseId/contents",
+  supabaseAuthJwtDecode,
+  requireAdmin,
+  asyncHandler(addCourseContent)
+);
+
+router.get(
+  "/:courseId/contents",
+  supabaseAuthJwtDecode,
+  requireAdmin,
+  asyncHandler(getCourseContents)
 );
 
 export default router;
