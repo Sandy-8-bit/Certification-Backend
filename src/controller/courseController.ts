@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
-import { prisma } from "../../lib/prisma";
-import { AppError } from "../../errors/appError";
-import { uploadFile } from "../../services/blob.service";
+import { prisma } from "../lib/prisma";
+import { AppError } from "../errors/appError";
+import { uploadFile } from "../services/blob.service";
 
 /* CREATE COURSE */
 export const createCourse = async (
