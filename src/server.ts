@@ -28,8 +28,8 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 // use validation routes
-app.use("/users", adminUserRouter);
-app.use("/course", courseRouter);
+app.use("/api/users", adminUserRouter);
+app.use("/api/courses", courseRouter);
 
 //swagger ui
 if (process.env.NODE_ENV !== "production") {

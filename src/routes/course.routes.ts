@@ -10,10 +10,6 @@ import {
 import { requireAdmin } from "../middleware/requireAdmin";
 import { supabaseAuthJwtDecode } from "../middleware/supabaseAuth";
 import { upload } from "../middleware/upload";
-import {
-  addCourseContent,
-  getCourseContents,
-} from "../controller/CourseContentControllers/contentController";
 
 const router = Router();
 
@@ -192,18 +188,145 @@ router.delete(
  *       404:
  *         description: Course not found
  */
+
+// ======================
+// Tier section
+// ======================
+
+import {
+  createTier,
+  getCourseTiers,
+  updateTier,
+  deleteTier,
+} from "../controller/CourseContentControllers/tierController";
+
+/**
+ * @swagger
+ * /api/courses/{courseId}/tiers:
+ *   post:
+ *     summary: Create a tier for a course
+ *     tags: [Courses]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: courseId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - tier_number
+ *               - tier_name
+ *             properties:
+ *               tier_number:
+ *                 type: integer
+ *               tier_name:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Tier created successfully
+ *       409:
+ *         description: Tier already exists
+ */
 router.post(
-  "/:courseId/contents",
+  "/:courseId/tiers",
   supabaseAuthJwtDecode,
   requireAdmin,
-  asyncHandler(addCourseContent)
+  asyncHandler(createTier)
 );
 
+/**
+ * @swagger
+ * /api/courses/{courseId}/tiers:
+ *   get:
+ *     summary: Get all tiers of a course
+ *     tags: [Courses]
+ *     parameters:
+ *       - in: path
+ *         name: courseId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: List of tiers
+ */
 router.get(
-  "/:courseId/contents",
+  "/:courseId/tiers",
   supabaseAuthJwtDecode,
   requireAdmin,
-  asyncHandler(getCourseContents)
+  asyncHandler(getCourseTiers)
+);
+
+/**
+ * @swagger
+ * /api/tiers/{tierId}:
+ *   put:
+ *     summary: Update tier metadata
+ *     tags: [Courses]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: tierId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               tier_name:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               tier_number:
+ *                 type: integer
+ *     responses:
+ *       200:
+ *         description: Tier updated successfully
+ */
+router.put(
+  "/tiers/:tierId",
+  supabaseAuthJwtDecode,
+  requireAdmin,
+  asyncHandler(updateTier)
+);
+
+/**
+ * @swagger
+ * /api/tiers/{tierId}:
+ *   delete:
+ *     summary: Delete a tier and its contents
+ *     tags: [Courses]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: tierId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Tier deleted successfully
+ */
+router.delete(
+  "/tiers/:tierId",
+  supabaseAuthJwtDecode,
+  requireAdmin,
+  asyncHandler(deleteTier)
 );
 
 export default router;
