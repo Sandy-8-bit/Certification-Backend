@@ -17,6 +17,12 @@ export const createTier = async (
     throw new AppError("tier_number and tier_name are required", 400);
   }
 
+  const tierNumber = Number(tier_number);
+
+  if (!Number.isInteger(tierNumber) || tierNumber < 1) {
+    throw new AppError("tier_number must be a positive integer", 400);
+  }
+
   // Ensure course exists
   const course = await prisma.courses.findUnique({
     where: { id: courseId },
@@ -31,13 +37,13 @@ export const createTier = async (
   const existingTier = await prisma.course_tiers.findFirst({
     where: {
       course_id: courseId,
-      tier_number,
+      tier_number: tierNumber,
     },
   });
 
   if (existingTier) {
     throw new AppError(
-      "Tier already exists with this tier_number for the course",
+      "Tier already exists with this tier number for this course",
       409
     );
   }
@@ -45,7 +51,7 @@ export const createTier = async (
   const tier = await prisma.course_tiers.create({
     data: {
       course_id: courseId,
-      tier_number,
+      tier_number: tierNumber,
       tier_name,
       description,
     },
@@ -100,6 +106,12 @@ export const updateTier = async (
   const { tierId } = req.params;
   const { tier_name, description, tier_number } = req.body;
 
+  const tierNumber = Number(tier_number);
+
+  if (!Number.isInteger(tierNumber) || tierNumber < 1) {
+    throw new AppError("tier_number must be a positive integer", 400);
+  }
+
   const tier = await prisma.course_tiers.findUnique({
     where: { id: tierId },
     select: { id: true, course_id: true },
@@ -110,11 +122,11 @@ export const updateTier = async (
   }
 
   // If tier_number is being updated, ensure uniqueness
-  if (tier_number) {
+  if (tierNumber) {
     const conflict = await prisma.course_tiers.findFirst({
       where: {
         course_id: tier.course_id,
-        tier_number,
+        tier_number: tierNumber,
         NOT: { id: tierId },
       },
     });
@@ -129,7 +141,7 @@ export const updateTier = async (
     data: {
       ...(tier_name && { tier_name }),
       ...(description !== undefined && { description }),
-      ...(tier_number && { tier_number }),
+      ...(tierNumber && { tier_number: tierNumber }),
     },
   });
 
