@@ -3,6 +3,7 @@ import { prisma } from "../lib/prisma";
 import { AppError } from "../errors/appError";
 import { Prisma } from "@prisma/client";
 import { recomputeCourseCompletion } from "../utils/recomputeCourseCompletion";
+import { uploadFile } from "../services/blob.service";
 
 // POST /course/tiers/:tierId/contents
 export const addTierContent = async (
@@ -10,6 +11,7 @@ export const addTierContent = async (
   res: Response
 ) => {
   const { tierId } = req.params;
+  const file = req.file;
   const data = req.body;
 
   const tier = await prisma.course_tiers.findUnique({
@@ -19,6 +21,18 @@ export const addTierContent = async (
 
   if (!tier) {
     throw new AppError("Tier not found", 404);
+  }
+
+  let thumbnail_url = "";
+
+  if (file) {
+    const resultUrl = await uploadFile(file, {
+      container: "images",
+      folder: "thumbnails",
+      isPublic: true,
+    });
+
+    thumbnail_url = resultUrl;
   }
 
   const week = Number(data.week);

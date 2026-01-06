@@ -102,6 +102,7 @@ router.post(
   "/tiers/:tierId/contents",
   supabaseAuthJwtDecode,
   requireAdmin,
+  upload.single("file"),
   asyncHandler(addTierContent)
 );
 
