@@ -4,6 +4,7 @@ import { AppError } from "../errors/appError";
 import { Prisma } from "@prisma/client";
 import { recomputeCourseCompletion } from "../utils/recomputeCourseCompletion";
 import { uploadFile } from "../services/blob.service";
+import { mapTierContents } from "../utils/tierContentMapper";
 
 // POST /course/tiers/:tierId/contents
 export const addTierContent = async (
@@ -147,9 +148,7 @@ export const getTierContents = async (
     },
   });
 
-  res.status(200).json({
-    tierId,
-    total: contents.length,
-    contents,
-  });
+  const response = mapTierContents(tierId, contents);
+
+  res.status(200).json(response);
 };
