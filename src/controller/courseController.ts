@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import { Request, Response } from "express";
 import { prisma } from "../lib/prisma";
 import { AppError } from "../errors/appError";
@@ -70,30 +71,49 @@ export const updateCourse = async (req: Request, res: Response) => {
   const { course_name, total_hours, price, description } = req.body;
   const file = req.file;
 
-  if (!course_name || !total_hours || !price || !description) {
-    throw new AppError("All fields are required", 400);
+  const updates: Prisma.coursesUpdateInput = {};
+
+  if (course_name !== undefined) {
+    updates.course_name = course_name;
   }
 
-  let thumbnail_url = "";
+  if (description !== undefined) {
+    updates.description = description;
+  }
+
+  if (total_hours !== undefined) {
+    const parsedHours = Number(total_hours);
+    if (Number.isNaN(parsedHours)) {
+      throw new AppError("total_hours must be a number", 400);
+    }
+    updates.total_hours = parsedHours;
+  }
+
+  if (price !== undefined) {
+    const parsedPrice = Number(price);
+    if (Number.isNaN(parsedPrice)) {
+      throw new AppError("price must be a number", 400);
+    }
+    updates.price = parsedPrice;
+  }
 
   if (file) {
-    const resultUrl = await uploadFile(file, {
+    const thumbnailUrl = await uploadFile(file, {
       container: "images",
       folder: "thumbnails",
       isPublic: true,
     });
 
-    thumbnail_url = resultUrl;
+    updates.thumbnail_url = thumbnailUrl;
   }
+
+  if (!Object.keys(updates).length) {
+    throw new AppError("No fields provided to update", 400);
+  }
+
   const course = await prisma.courses.update({
     where: { id },
-    data: {
-      course_name,
-      description,
-      total_hours: Number(total_hours),
-      price: Number(price),
-      thumbnail_url: thumbnail_url || "",
-    },
+    data: updates,
   });
 
   res.json(course);

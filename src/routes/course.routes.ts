@@ -31,7 +31,7 @@ router.get("/", asyncHandler(getAllCourses));
 
 router.get("/:id", asyncHandler(getCourseById));
 
-router.put(
+router.patch(
   "/:id",
   supabaseAuthJwtDecode,
   requireAdmin,
