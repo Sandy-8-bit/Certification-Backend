@@ -68,7 +68,8 @@ export const getCourseById = async (req: Request, res: Response) => {
 export const updateCourse = async (req: Request, res: Response) => {
   const { id } = req.params;
 
-  const { course_name, total_hours, price, description } = req.body;
+  const { course_name, total_hours, price, description, remove_thumbnail } =
+    req.body;
   const file = req.file;
 
   const updates: Prisma.coursesUpdateInput = {};
@@ -105,6 +106,10 @@ export const updateCourse = async (req: Request, res: Response) => {
     });
 
     updates.thumbnail_url = thumbnailUrl;
+  }
+
+  if (remove_thumbnail === "true") {
+    updates.thumbnail_url = "";
   }
 
   if (!Object.keys(updates).length) {
