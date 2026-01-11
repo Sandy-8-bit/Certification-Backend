@@ -62,7 +62,6 @@ import {
 router.get(
   "/:courseId/tiers",
   supabaseAuthJwtDecode,
-  requireAdmin,
   asyncHandler(getCourseTiers)
 );
 
@@ -109,7 +108,6 @@ router.post(
 router.get(
   "/tiers/:tierId/contents",
   supabaseAuthJwtDecode,
-  requireAdmin,
   asyncHandler(getTierContents)
 );
 
