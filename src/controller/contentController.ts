@@ -5,6 +5,7 @@ import { Prisma } from "@prisma/client";
 import { recomputeCourseCompletion } from "../utils/recomputeCourseCompletion";
 import { uploadFile } from "../services/blob.service";
 import { mapTierContents } from "../utils/tierContentMapper";
+import { AuthRequest } from "../middleware/supabaseAuth";
 
 // POST /course/tiers/:tierId/contents
 export const addTierContent = async (
@@ -121,9 +122,12 @@ export const addTierContent = async (
 
 // GET /course/tiers/:tierId/contents
 export const getTierContents = async (
-  req: Request<{ tierId: string }>,
+  req: AuthRequest & { params: { tierId: string } },
   res: Response
 ) => {
+  const ADMIN_SUPABASE_ID = process.env.ADMIN_UUID!;
+  const user = req.user;
+
   const { tierId } = req.params;
 
   const tier = await prisma.course_tiers.findUnique({
@@ -133,6 +137,37 @@ export const getTierContents = async (
 
   if (!tier) {
     throw new AppError("Tier not found", 404);
+  }
+
+  if (!user) {
+    throw new AppError("Unauthorized", 401);
+  }
+
+  // Admin check
+  const isAdmin = user.id === ADMIN_SUPABASE_ID;
+
+  // Admins can always access
+  if (!isAdmin) {
+    const tier = await prisma.course_tiers.findFirst({
+      where: {
+        id: tierId,
+      },
+    });
+
+    if (!tier) {
+      throw new AppError("Tier not found", 404);
+    }
+
+    const subscription = await prisma.subscriptions.findFirst({
+      where: {
+        user_id: user.id,
+        course_id: tier.course_id,
+      },
+    });
+
+    if (!subscription) {
+      throw new AppError("Access denied to this video", 403);
+    }
   }
 
   const contents = await prisma.contents.findMany({

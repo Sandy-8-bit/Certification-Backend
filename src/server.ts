@@ -11,6 +11,7 @@ import { swaggerSpec } from "./config/swagger";
 import adminUserRouter from "./routes/adminUser.routes";
 import courseRouter from "./routes/course.routes";
 import mediaRouter from "./routes/media.routes";
+import subscriptionRouter from "./routes/subscription.routes";
 
 const app: Application = express();
 
@@ -32,6 +33,7 @@ app.get("/", (req: Request, res: Response) => {
 app.use("/api/v1/media", mediaRouter);
 app.use("/api/v1/users", adminUserRouter);
 app.use("/api/v1/courses", courseRouter);
+app.use("/api/v1", subscriptionRouter);
 
 //swagger ui
 if (process.env.NODE_ENV !== "production") {
