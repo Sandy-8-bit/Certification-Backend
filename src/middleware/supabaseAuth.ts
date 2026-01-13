@@ -40,6 +40,7 @@ export function supabaseAuthJwtDecode(
     req.user = {
       id: decoded.sub,
       email: decoded.email,
+      name: decoded.user_metadata.name,
     };
 
     next();
