@@ -48,6 +48,24 @@ router.delete(
 
 /**
  * ======================
+ * Subscription section to that course
+ * ======================
+ */
+
+router.post(
+  "/:courseId/subscribe",
+  supabaseAuthJwtDecode,
+  asyncHandler(subscribeToCourse)
+);
+
+router.post(
+  "/subscribe/verify",
+  supabaseAuthJwtDecode,
+  asyncHandler(verifySubscriptionPayment)
+);
+
+/**
+ * ======================
  * Tier section
  * ======================
  */
@@ -96,6 +114,10 @@ import {
   addTierContent,
   getTierContents,
 } from "../controller/contentController";
+import {
+  subscribeToCourse,
+  verifySubscriptionPayment,
+} from "../controller/subscriptionController";
 
 router.post(
   "/tiers/:tierId/contents",
