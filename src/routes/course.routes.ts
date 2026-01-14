@@ -10,6 +10,20 @@ import {
 import { requireAdmin } from "../middleware/requireAdmin";
 import { supabaseAuthJwtDecode } from "../middleware/supabaseAuth";
 import { upload } from "../middleware/upload";
+import {
+  subscribeToCourse,
+  verifySubscriptionPayment,
+} from "../controller/subscriptionController";
+import {
+  createTier,
+  getCourseTiers,
+  updateTier,
+  deleteTier,
+} from "../controller/tierController";
+import {
+  addTierContent,
+  getTierContents,
+} from "../controller/contentController";
 
 const router = Router();
 
@@ -70,13 +84,6 @@ router.post(
  * ======================
  */
 
-import {
-  createTier,
-  getCourseTiers,
-  updateTier,
-  deleteTier,
-} from "../controller/tierController";
-
 router.get(
   "/:courseId/tiers",
   supabaseAuthJwtDecode,
@@ -109,15 +116,6 @@ router.delete(
  * Content section
  * ======================
  */
-
-import {
-  addTierContent,
-  getTierContents,
-} from "../controller/contentController";
-import {
-  subscribeToCourse,
-  verifySubscriptionPayment,
-} from "../controller/subscriptionController";
 
 router.post(
   "/tiers/:tierId/contents",
